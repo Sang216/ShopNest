@@ -10,7 +10,7 @@ import java.util.Date;
 @Setter
 public abstract class BaseEntity {
 
-    private int id;
+    private Long id;
     private Date createdAt;
     private Date lastUpdatedAt;
     private State state;
