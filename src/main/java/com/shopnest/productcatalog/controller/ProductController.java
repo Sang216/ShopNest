@@ -1,10 +1,11 @@
 package com.shopnest.productcatalog.controller;
 
 import com.shopnest.productcatalog.dto.CategoryDto;
+import com.shopnest.productcatalog.dto.PitchResponseDto;
 import com.shopnest.productcatalog.dto.ProductDto;
 import com.shopnest.productcatalog.model.Product;
-import com.shopnest.productcatalog.service.IMarketNotifierService;
 import com.shopnest.productcatalog.service.IProductService;
+import com.shopnest.productcatalog.service.PitchNotifyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +19,12 @@ public class ProductController {
 
     @Autowired
     private IProductService productService;
-    private IMarketNotifierService iMarketNotifierService;
+    private PitchNotifyService pitchNotifyService;
 
-    public ProductController(IProductService productService, IMarketNotifierService iMarketNotifierService) {
+    public ProductController(IProductService productService,
+                             PitchNotifyService pitchNotifyService) {
         this.productService = productService;
-        this.iMarketNotifierService = iMarketNotifierService;
+        this.pitchNotifyService = pitchNotifyService;
     }
 
     @GetMapping
@@ -57,8 +59,23 @@ public class ProductController {
         return dto;
     }
 
-    @PostMapping
-    private String getMarketMessage() {
-        return iMarketNotifierService.getMarketNotifyMessage();
+
+    @GetMapping("{id}/pitch")
+    private ResponseEntity<PitchResponseDto> getPitchMessage(@PathVariable Long id) {
+        if(id<0) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        Product product = productService.getProductById(id);
+        if (product == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        String message = pitchNotifyService.getPitchNotifyMessage(product);
+
+        PitchResponseDto dto = new PitchResponseDto();
+        dto.setId(product.getId());
+        dto.setMessage(message);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 }
