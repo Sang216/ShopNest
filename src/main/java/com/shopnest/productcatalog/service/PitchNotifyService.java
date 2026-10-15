@@ -2,6 +2,7 @@ package com.shopnest.productcatalog.service;
 
 import com.shopnest.productcatalog.dto.GroqPitchResponseDto;
 import com.shopnest.productcatalog.model.Product;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class PitchNotifyService {
 
     private static final String GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
@@ -54,7 +56,8 @@ public class PitchNotifyService {
             }
             throw new IllegalArgumentException("Pitch couldn't be generated");
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+//            System.out.println(e.getMessage());
+            log.warn("Error: ", e.getMessage());
             return "New arrival: " + product.getName() +
                     " for just $" + product.getPrice() + ". Check it out!";
         }

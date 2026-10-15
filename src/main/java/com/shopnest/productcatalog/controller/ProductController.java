@@ -17,14 +17,16 @@ import java.util.List;
 @RequestMapping("/products")
 public class ProductController {
 
-    @Autowired
-    private IProductService productService;
-    private PitchNotifyService pitchNotifyService;
+    private final IProductService productService;
+    private final PitchNotifyService pitchNotifyService;
+//    private final IProductService supplierService;
 
     public ProductController(IProductService productService,
                              PitchNotifyService pitchNotifyService) {
+//                             @Qualifier("dummyProductService") IProductService supplierService) {
         this.productService = productService;
         this.pitchNotifyService = pitchNotifyService;
+//        this.supplierService = supplierService;
     }
 
     @GetMapping
@@ -77,5 +79,18 @@ public class ProductController {
         dto.setId(product.getId());
         dto.setMessage(message);
         return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto dto) {
+        Product product = productService.createProduct(dto);
+        return new ResponseEntity<>(from(product),HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        boolean isDeleted = productService.deleteProductById(id);
+        if (isDeleted) return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

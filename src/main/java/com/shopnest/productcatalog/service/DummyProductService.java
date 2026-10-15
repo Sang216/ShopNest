@@ -1,6 +1,7 @@
 package com.shopnest.productcatalog.service;
 
 import com.shopnest.productcatalog.dto.DummyJsonProductDto;
+import com.shopnest.productcatalog.dto.ProductDto;
 import com.shopnest.productcatalog.model.Category;
 import com.shopnest.productcatalog.model.Product;
 import org.springframework.boot.restclient.RestTemplateBuilder;
@@ -8,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
 
 @Service
 public class DummyProductService implements IProductService {
@@ -31,6 +34,21 @@ public class DummyProductService implements IProductService {
         } catch (HttpClientErrorException.NotFound e) {
             return null;
         }
+    }
+
+    @Override
+    public List<Product> getAllProducts() {
+        return List.of();
+    }
+
+    @Override
+    public Product createProduct(ProductDto dto) {
+        return null;
+    }
+
+    @Override
+    public boolean deleteProductById(Long id) {
+        return false;
     }
 
     private Product from(DummyJsonProductDto dto) {

@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 @Setter
 public class ProductDto {
 
+    private Long id;
+
     private String name;
 
     private BigDecimal price;
@@ -16,5 +18,7 @@ public class ProductDto {
     private String description;
 
     private CategoryDto category;
+
+    private String imageUrl;
 
 }

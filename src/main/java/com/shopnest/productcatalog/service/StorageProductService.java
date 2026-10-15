@@ -1,0 +1,95 @@
+package com.shopnest.productcatalog.service;
+
+import com.shopnest.productcatalog.dto.ProductDto;
+import com.shopnest.productcatalog.model.Category;
+import com.shopnest.productcatalog.model.Product;
+import com.shopnest.productcatalog.model.enums.State;
+import com.shopnest.productcatalog.repository.CategoryRepository;
+import com.shopnest.productcatalog.repository.ProductRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Primary
+@Slf4j
+public class StorageProductService implements IProductService {
+
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+
+    public StorageProductService(ProductRepository productRepository,
+                                 CategoryRepository categoryRepository) {
+        this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
+    }
+
+    @Override
+    public Product getProductById(Long id) {
+        log.info("Reading from DB.. ");
+        return productRepository.findById(id)
+                .orElse(null);
+    }
+
+    @Override
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
+
+    @Override
+    public Product createProduct(ProductDto dto) {
+        Product product = from(dto);
+        product.setCategory(findOrCreateCategory(product.getCategory()));
+        product.setCreatedAt(new Date());
+        product.setLastUpdatedAt(new Date());
+        product.setState(State.ACTIVE);
+        return productRepository.save(product);
+    }
+
+    @Override
+    public boolean deleteProductById(Long id) {
+        Product product = productRepository.findById(id).orElse(null);
+        if(product==null) return false;
+        product.setState(State.INACTIVE);
+        product.setLastUpdatedAt(new Date());
+        productRepository.save(product);
+        return true;
+    }
+
+    private Category findOrCreateCategory(Category category) {
+
+        if (category == null) return null;
+
+        Optional<Category> existing = categoryRepository.findByName(category.getName());
+        if (existing.isPresent()) {
+            return existing.get();
+        }
+
+        category.setId(null);
+        category.setCreatedAt(new Date());
+        category.setLastUpdatedAt(new Date());
+        return category;
+    }
+
+    private Product from(ProductDto dto) {
+
+        Product product = new Product();
+        product.setId(dto.getId());
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setPrice(dto.getPrice());
+        product.setImageUrl(dto.getImageUrl());
+
+        if (dto.getCategory() != null) {
+            Category category = new Category();
+            category.setName(dto.getCategory().getName());
+            category.setDescription(dto.getCategory().getDescription());
+            product.setCategory(category);
+        }
+        return product;
+    }
+}
