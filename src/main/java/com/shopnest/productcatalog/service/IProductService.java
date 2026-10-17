@@ -13,4 +13,8 @@ public interface IProductService {
     Product createProduct(ProductDto dto);
 
     boolean deleteProductById(Long id);
+
+    Product update(Long id, ProductDto dto);
+
+    Product patch(Long id, ProductDto dto);
 }

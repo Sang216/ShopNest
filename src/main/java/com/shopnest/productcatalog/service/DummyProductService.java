@@ -1,6 +1,7 @@
 package com.shopnest.productcatalog.service;
 
 import com.shopnest.productcatalog.dto.DummyJsonProductDto;
+import com.shopnest.productcatalog.dto.DummyJsonProductListDto;
 import com.shopnest.productcatalog.dto.ProductDto;
 import com.shopnest.productcatalog.model.Category;
 import com.shopnest.productcatalog.model.Product;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -38,7 +40,14 @@ public class DummyProductService implements IProductService {
 
     @Override
     public List<Product> getAllProducts() {
-        return List.of();
+        ResponseEntity<DummyJsonProductListDto> response = restTemplate.getForEntity(
+                "https://dummyjson.com/products?limit=0", DummyJsonProductListDto.class);
+
+        List<Product> products = new ArrayList<>();
+        for (DummyJsonProductDto dto : response.getBody().getProducts()) {
+            products.add(from(dto));
+        }
+        return products;
     }
 
     @Override
@@ -49,6 +58,16 @@ public class DummyProductService implements IProductService {
     @Override
     public boolean deleteProductById(Long id) {
         return false;
+    }
+
+    @Override
+    public Product update(Long id, ProductDto dto) {
+        return null;
+    }
+
+    @Override
+    public Product patch(Long id, ProductDto dto) {
+        return null;
     }
 
     private Product from(DummyJsonProductDto dto) {

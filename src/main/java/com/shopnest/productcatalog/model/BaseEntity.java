@@ -20,5 +20,5 @@ public abstract class BaseEntity {
     private Date lastUpdatedAt;
 
     @Enumerated(value = EnumType.STRING)
-    private State state;
+    private State state; // ACTIVE, INACTIVE
 }

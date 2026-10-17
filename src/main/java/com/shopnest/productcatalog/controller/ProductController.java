@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -30,8 +31,13 @@ public class ProductController {
     }
 
     @GetMapping
-    List<Product> getProducts() {
-        return List.of();
+    List<ProductDto> getProducts() {
+        List<Product> products = productService.getAllProducts();
+        List<ProductDto> dtos = new ArrayList<>();
+        for (Product product: products) {
+            dtos.add(from(product));
+        }
+        return dtos;
     }
 
     @GetMapping("/{id}")
@@ -46,21 +52,6 @@ public class ProductController {
         }
         return new ResponseEntity<>(from(product), HttpStatus.OK);
     }
-
-    private ProductDto from(Product product) {
-        ProductDto dto = new ProductDto();
-        dto.setName(product.getName());
-        dto.setDescription(product.getDescription());
-        dto.setPrice(product.getPrice());
-
-        CategoryDto category = new CategoryDto();
-        category.setName(product.getCategory().getName());
-        category.setDescription(product.getDescription());
-
-        dto.setCategory(category);
-        return dto;
-    }
-
 
     @GetMapping("{id}/pitch")
     private ResponseEntity<PitchResponseDto> getPitchMessage(@PathVariable Long id) {
@@ -87,10 +78,43 @@ public class ProductController {
         return new ResponseEntity<>(from(product),HttpStatus.CREATED);
     }
 
+    @PutMapping("{id}")
+    public ResponseEntity<ProductDto> updateProduct(@PathVariable Long id, @RequestBody ProductDto dto) {
+        Product product = productService.update(id, dto);
+        if (product == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(from(product),HttpStatus.OK);
+    }
+
+    @PatchMapping("{id}")
+    public ResponseEntity<ProductDto> patchProduct(@PathVariable Long id,  @RequestBody ProductDto dto) {
+        Product product = productService.patch(id, dto);
+        if (product == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(from(product),HttpStatus.OK);
+    }
+
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         boolean isDeleted = productService.deleteProductById(id);
         if (isDeleted) return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    private ProductDto from(Product product) {
+        ProductDto dto = new ProductDto();
+        dto.setId(product.getId());
+        dto.setName(product.getName());
+        dto.setDescription(product.getDescription());
+        dto.setPrice(product.getPrice());
+        dto.setImageUrl(product.getImageUrl());
+
+        if (product.getCategory() != null) {
+            CategoryDto category = new CategoryDto();
+            category.setId(product.getCategory().getId());
+            category.setName(product.getCategory().getName());
+            category.setDescription(product.getDescription());
+
+            dto.setCategory(category);
+        }
+        return dto;
     }
 }

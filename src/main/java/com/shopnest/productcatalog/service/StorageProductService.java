@@ -1,5 +1,6 @@
 package com.shopnest.productcatalog.service;
 
+import com.shopnest.productcatalog.dto.CategoryDto;
 import com.shopnest.productcatalog.dto.ProductDto;
 import com.shopnest.productcatalog.model.Category;
 import com.shopnest.productcatalog.model.Product;
@@ -47,12 +48,74 @@ public class StorageProductService implements IProductService {
         product.setCreatedAt(new Date());
         product.setLastUpdatedAt(new Date());
         product.setState(State.ACTIVE);
+
         return productRepository.save(product);
+    }
+
+    public Product update(Long id, ProductDto dto) {
+
+        Product product = productRepository.findByIdAndState(id, State.ACTIVE).orElse(null);
+
+        if (product != null) {
+            product.setName(dto.getName());
+            product.setDescription(dto.getDescription());
+            product.setPrice(dto.getPrice());
+            product.setImageUrl(dto.getImageUrl());
+            product.setLastUpdatedAt(new Date());
+
+            if (dto.getCategory() != null) {
+                Category category = fromCategory(dto.getCategory());
+                product.setCategory(findOrCreateCategory(category));
+            }
+            productRepository.save(product);
+        }
+        return product;
+    }
+
+    public Product patch(Long id, ProductDto dto) {
+
+        Product product = productRepository.findByIdAndState(id, State.ACTIVE).orElse(null);
+        if (product == null) {
+            return null;
+        }
+
+        if (dto.getName() != null) {
+            product.setName(dto.getName());
+        }
+
+        if (dto.getDescription() != null) {
+            product.setDescription(dto.getDescription());
+        }
+
+        if (dto.getImageUrl() != null) {
+            product.setImageUrl(dto.getImageUrl());
+        }
+
+        if (dto.getPrice() != null) {
+            product.setPrice(dto.getPrice());
+        }
+
+        if (dto.getCategory() != null) {
+            Category category = fromCategory(dto.getCategory());
+            product.setCategory(findOrCreateCategory(category));
+        }
+
+        product.setLastUpdatedAt(new Date());
+
+        return productRepository.save(product);
+    }
+
+    private Category fromCategory(CategoryDto dto) {
+        Category category = new Category();
+        category.setName(dto.getName());
+        category.setDescription(dto.getDescription());
+
+        return category;
     }
 
     @Override
     public boolean deleteProductById(Long id) {
-        Product product = productRepository.findById(id).orElse(null);
+        Product product = productRepository.findByIdAndState(id, State.ACTIVE).orElse(null);
         if(product==null) return false;
         product.setState(State.INACTIVE);
         product.setLastUpdatedAt(new Date());
@@ -72,7 +135,8 @@ public class StorageProductService implements IProductService {
         category.setId(null);
         category.setCreatedAt(new Date());
         category.setLastUpdatedAt(new Date());
-        return category;
+        category.setState(State.ACTIVE);
+        return categoryRepository.save(category);
     }
 
     private Product from(ProductDto dto) {
