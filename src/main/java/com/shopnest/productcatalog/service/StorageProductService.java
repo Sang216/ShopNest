@@ -9,8 +9,11 @@ import com.shopnest.productcatalog.repository.CategoryRepository;
 import com.shopnest.productcatalog.repository.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -105,6 +108,14 @@ public class StorageProductService implements IProductService {
         return productRepository.save(product);
     }
 
+    @Override
+    public Page<Product> getProductsInPriceRange(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+        return productRepository.findByPriceBetweenAndState(minPrice,
+                maxPrice,
+                State.ACTIVE,
+                pageable);
+    }
+
     private Category fromCategory(CategoryDto dto) {
         Category category = new Category();
         category.setName(dto.getName());
@@ -156,4 +167,5 @@ public class StorageProductService implements IProductService {
         }
         return product;
     }
+
 }

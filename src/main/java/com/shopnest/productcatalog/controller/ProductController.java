@@ -7,10 +7,14 @@ import com.shopnest.productcatalog.model.Product;
 import com.shopnest.productcatalog.service.IProductService;
 import com.shopnest.productcatalog.service.PitchNotifyService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +35,7 @@ public class ProductController {
     }
 
     @GetMapping
-    List<ProductDto> getProducts() {
+    List<ProductDto> getAllProducts() {
         List<Product> products = productService.getAllProducts();
         List<ProductDto> dtos = new ArrayList<>();
         for (Product product: products) {
@@ -97,6 +101,17 @@ public class ProductController {
         boolean isDeleted = productService.deleteProductById(id);
         if (isDeleted) return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/search")
+    public PagedModel<ProductDto> getProductsInPriceRange(@RequestParam BigDecimal minPrice,
+                                              @RequestParam BigDecimal maxPrice,
+                                              Pageable pageable) {
+        Page<ProductDto> products = productService
+                .getProductsInPriceRange(minPrice,maxPrice,pageable)
+                .map(x -> from(x));
+
+        return new PagedModel<>(products);
     }
 
     private ProductDto from(Product product) {
