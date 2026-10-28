@@ -1,12 +1,11 @@
 package com.shopnest.productcatalog.controller;
 
-import com.shopnest.productcatalog.dto.CategoryDto;
 import com.shopnest.productcatalog.dto.PitchResponseDto;
 import com.shopnest.productcatalog.dto.ProductDto;
+import com.shopnest.productcatalog.mappers.ProductMapper;
 import com.shopnest.productcatalog.model.Product;
 import com.shopnest.productcatalog.service.IProductService;
 import com.shopnest.productcatalog.service.PitchNotifyService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -24,14 +23,14 @@ public class ProductController {
 
     private final IProductService productService;
     private final PitchNotifyService pitchNotifyService;
-//    private final IProductService supplierService;
+    private final ProductMapper productMapper;
 
     public ProductController(IProductService productService,
-                             PitchNotifyService pitchNotifyService) {
-//                             @Qualifier("dummyProductService") IProductService supplierService) {
+                             PitchNotifyService pitchNotifyService,
+                             ProductMapper productMapper) {
         this.productService = productService;
         this.pitchNotifyService = pitchNotifyService;
-//        this.supplierService = supplierService;
+        this.productMapper = productMapper;
     }
 
     @GetMapping
@@ -39,7 +38,7 @@ public class ProductController {
         List<Product> products = productService.getAllProducts();
         List<ProductDto> dtos = new ArrayList<>();
         for (Product product: products) {
-            dtos.add(from(product));
+            dtos.add(productMapper.toDto(product));
         }
         return dtos;
     }
@@ -54,7 +53,7 @@ public class ProductController {
         if (product == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(from(product), HttpStatus.OK);
+        return new ResponseEntity<>(productMapper.toDto(product), HttpStatus.OK);
     }
 
     @GetMapping("{id}/pitch")
@@ -79,21 +78,21 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto dto) {
         Product product = productService.createProduct(dto);
-        return new ResponseEntity<>(from(product),HttpStatus.CREATED);
+        return new ResponseEntity<>(productMapper.toDto(product),HttpStatus.CREATED);
     }
 
     @PutMapping("{id}")
     public ResponseEntity<ProductDto> updateProduct(@PathVariable Long id, @RequestBody ProductDto dto) {
         Product product = productService.update(id, dto);
         if (product == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        return new ResponseEntity<>(from(product),HttpStatus.OK);
+        return new ResponseEntity<>(productMapper.toDto(product),HttpStatus.OK);
     }
 
     @PatchMapping("{id}")
     public ResponseEntity<ProductDto> patchProduct(@PathVariable Long id,  @RequestBody ProductDto dto) {
         Product product = productService.patch(id, dto);
         if (product == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        return new ResponseEntity<>(from(product),HttpStatus.OK);
+        return new ResponseEntity<>(productMapper.toDto(product),HttpStatus.OK);
     }
 
     @DeleteMapping("{id}")
@@ -104,32 +103,13 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public PagedModel<ProductDto> getProductsInPriceRange(@RequestParam BigDecimal minPrice,
-                                              @RequestParam BigDecimal maxPrice,
+    public PagedModel<ProductDto> getProductsInPriceRange(@RequestParam(required = false) BigDecimal minPrice,
+                                              @RequestParam(required = false) BigDecimal maxPrice,
                                               Pageable pageable) {
         Page<ProductDto> products = productService
                 .getProductsInPriceRange(minPrice,maxPrice,pageable)
-                .map(x -> from(x));
+                .map(productMapper::toDto);
 
         return new PagedModel<>(products);
-    }
-
-    private ProductDto from(Product product) {
-        ProductDto dto = new ProductDto();
-        dto.setId(product.getId());
-        dto.setName(product.getName());
-        dto.setDescription(product.getDescription());
-        dto.setPrice(product.getPrice());
-        dto.setImageUrl(product.getImageUrl());
-
-        if (product.getCategory() != null) {
-            CategoryDto category = new CategoryDto();
-            category.setId(product.getCategory().getId());
-            category.setName(product.getCategory().getName());
-            category.setDescription(product.getDescription());
-
-            dto.setCategory(category);
-        }
-        return dto;
     }
 }
