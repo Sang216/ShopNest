@@ -131,11 +131,11 @@ jobs:
       - name: Run smoke test via OpenCode agent
         run: |
           opencode run --standalone \
-            --agent plan \
+            --agent build \
             --model anthropic/claude-sonnet-5.5 \
             --auto \
-            --file requests.md \
-            "Smoke test the ShopNest product catalog API. Base URLs: auth service at http://localhost:8081, product catalog at http://localhost:8080. Follow the requests in requests.md, execute each one, and verify the expected status codes. Focus on the changes from commit ${{ github.sha }}."
+            -f requests.md \
+            "Write smoke.sh: a bash script under 40 lines that runs the attached requests in order with curl against AUTH_URL and CATALOG_URL(env variable). Use only curl and sed. Print PASS or FAIL with the requesr number and status cods. keep it simple don't run it."
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
