@@ -130,14 +130,14 @@ jobs:
 
       - name: Run smoke test via OpenCode agent
         run: |
-          opencode run --standalone \
+          opencode run \
             --agent build \
-            --model anthropic/claude-sonnet-5.5 \
+            --model llama-3.3-70b-versatile \
             --auto \
             -f requests.md \
-            "Write smoke.sh: a bash script under 40 lines that runs the attached requests in order with curl against AUTH_URL and CATALOG_URL(env variable). Use only curl and sed. Print PASS or FAIL with the requesr number and status cods. keep it simple don't run it."
+            "Write smoke.sh: a bash script under 40 lines that runs the attached requests in order with curl against AUTH_URL and CATALOG_URL(env variable). Use only curl and sed. Print PASS or FAIL with the request number and status cods. keep it simple don't run it."
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
 
   deploy:
     runs-on: ubuntu-latest

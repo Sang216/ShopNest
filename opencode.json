@@ -7,5 +7,17 @@
     { "action": "shell", "resource": "git push *", "effect": "deny" },
     { "action": "shell", "resource": "rm *", "effect": "deny" },
     { "action": "shell", "resource": "trash *", "effect": "deny" }
-  ]
+  ],
+  "mcp": {
+    "servers": {
+      "context7": {
+        "type": "remote",
+        "url": "https://mcp.context7.com/mcp"
+      },
+      "notion": {
+        "type": "remote",
+        "url": "https://mcp.notion.com/mcp"
+      }
+    }
+  }
 }
