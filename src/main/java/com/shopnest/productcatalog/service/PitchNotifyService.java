@@ -1,16 +1,10 @@
 package com.shopnest.productcatalog.service;
 
+import com.shopnest.productcatalog.clients.GroqClient;
 import com.shopnest.productcatalog.dto.GroqPitchResponseDto;
 import com.shopnest.productcatalog.model.Product;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.restclient.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -19,26 +13,18 @@ import java.util.Map;
 @Slf4j
 public class PitchNotifyService {
 
-    private static final String GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
     private static final String MODEL = "openai/gpt-oss-20b";
     private static final String SYSTEM_PROMPT = "You are a marketing copywriter for ShopNest, an online store. \"\n" +
             "            + \"You write short push notifications that make people want to open the app.";
 
-    private final RestTemplate restTemplate;
-    private final String apiKey;
+    private final GroqClient groqClient;
 
-    public PitchNotifyService(RestTemplateBuilder builder,
-                              @Value("${groq.api-key}") String apiKey) {
-        this.restTemplate = builder.build();
-        this.apiKey = apiKey;
+    public PitchNotifyService(GroqClient groqClient) {
+        this.groqClient = groqClient;
     }
 
     public String getPitchNotifyMessage(Product product) {
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(apiKey);
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
             Map<String, Object> body = Map.of(
                     "model", MODEL,
                     "reasoning_effort", "low",
@@ -48,15 +34,11 @@ public class PitchNotifyService {
                             Map.of("role", "user", "content", buildPrompt(product)))
             );
 
-            ResponseEntity<GroqPitchResponseDto> response =
-                    restTemplate.postForEntity(GROQ_URL, new HttpEntity<>(body,headers), GroqPitchResponseDto.class);
+            GroqPitchResponseDto response = groqClient.getPitch(body);
 
-            if(response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
-                return response.getBody().getChoices().get(0).getMessage().getContent();
-            }
-            throw new IllegalArgumentException("Pitch couldn't be generated");
+
+            return response.getChoices().get(0).getMessage().getContent();
         } catch (Exception e) {
-//            System.out.println(e.getMessage());
             log.warn("Error: ", e.getMessage());
             return "New arrival: " + product.getName() +
                     " for just $" + product.getPrice() + ". Check it out!";

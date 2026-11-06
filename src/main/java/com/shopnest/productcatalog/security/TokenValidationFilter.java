@@ -1,5 +1,6 @@
 package com.shopnest.productcatalog.security;
 
+import com.shopnest.productcatalog.clients.AuthClient;
 import com.shopnest.productcatalog.dto.AuthUserDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -11,7 +12,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -20,12 +20,12 @@ import java.io.IOException;
 public class TokenValidationFilter extends OncePerRequestFilter {
 
     private final String authServiceUrl;
-    private final RestTemplate restTemplate;
+    private final AuthClient authClient;
 
     public TokenValidationFilter(@Value("${auth.service.url}") String authServiceUrl,
-                                 RestTemplateBuilder restTemplateBuilder) {
+                                 AuthClient authClient) {
         this.authServiceUrl = authServiceUrl;
-        this.restTemplate = restTemplateBuilder.build();
+        this.authClient = authClient;
     }
 
     @Override
@@ -42,17 +42,9 @@ public class TokenValidationFilter extends OncePerRequestFilter {
             return;
         }
 
-        AuthUserDto authUserDto;
+        AuthUserDto user;
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", header);
-            ResponseEntity<AuthUserDto> authResponse  = restTemplate.exchange(
-                    this.authServiceUrl+"/auth/validateToken",
-                    HttpMethod.GET,
-                    new HttpEntity<>(headers),
-                    AuthUserDto.class
-            );
-            authUserDto = authResponse.getBody();
+            user = authClient.validateToken(header);
         } catch (HttpClientErrorException.Unauthorized e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return;
@@ -62,7 +54,7 @@ public class TokenValidationFilter extends OncePerRequestFilter {
         }
 
         if (request.getMethod().equals("DELETE") &&
-         !"ADMIN".equals(authUserDto.getRole())) {
+         !"ADMIN".equals(user.getRole())) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             return;
         }
