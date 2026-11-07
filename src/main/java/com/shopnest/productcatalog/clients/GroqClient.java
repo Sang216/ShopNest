@@ -12,7 +12,6 @@ import java.util.Map;
 public class GroqClient {
 
     private final RestClient restClient;
-    private final String apiKey;
 
     public GroqClient(RestClient.Builder builder,
                       @Value("${groq.url}") String groqUrl,
@@ -20,7 +19,6 @@ public class GroqClient {
         this.restClient = builder.baseUrl(groqUrl)
                 .defaultHeaders(headers -> headers.setBearerAuth(apiKey))
                 .build();
-        this.apiKey = apiKey;
     }
 
     @CircuitBreaker(name = "groq")
