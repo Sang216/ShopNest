@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -57,7 +58,7 @@ class StorageProductServiceTest {
         dto.setCategory(categoryDto);
 
         Category existingCategory = new Category();
-        existingCategory.setId(5L);
+        existingCategory.setId(UUID.randomUUID());
         existingCategory.setName("Electronics");
         existingCategory.setDescription("Electronic accessories");
 

@@ -9,11 +9,11 @@ import com.shopnest.productcatalog.model.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class DummyProductService implements IProductService {
@@ -25,17 +25,8 @@ public class DummyProductService implements IProductService {
     }
 
     @Override
-    public Product getProductById(Long id) {
-        try {
-            DummyJsonProductDto product = dummyJsonClient.getProductById(id);
-
-            if (product != null) {
-                return from(product);
-            }
-            return null;
-        } catch (HttpClientErrorException.NotFound e) {
-            return null;
-        }
+    public Product getProductById(UUID id) {
+        return null;
     }
 
     @Override
@@ -55,17 +46,17 @@ public class DummyProductService implements IProductService {
     }
 
     @Override
-    public boolean deleteProductById(Long id) {
+    public boolean deleteProductById(UUID id) {
         return false;
     }
 
     @Override
-    public Product update(Long id, ProductDto dto) {
+    public Product update(UUID id, ProductDto dto) {
         return null;
     }
 
     @Override
-    public Product patch(Long id, ProductDto dto) {
+    public Product patch(UUID id, ProductDto dto) {
         return null;
     }
 
@@ -77,7 +68,6 @@ public class DummyProductService implements IProductService {
     private Product from(DummyJsonProductDto dto) {
 
         Product product = new Product();
-        product.setId(dto.getId());
         product.setName(dto.getTitle());
         product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());

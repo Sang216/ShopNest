@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/products")
@@ -44,11 +45,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    ResponseEntity<ProductDto> getProductById(@PathVariable("id") Long id) {
-        if (id < 0) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
+    ResponseEntity<ProductDto> getProductById(@PathVariable("id") UUID id) {
         Product product = productService.getProductById(id);
         if (product == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -57,11 +54,7 @@ public class ProductController {
     }
 
     @GetMapping("{id}/pitch")
-    private ResponseEntity<PitchResponseDto> getPitchMessage(@PathVariable Long id) {
-        if(id<0) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
+    private ResponseEntity<PitchResponseDto> getPitchMessage(@PathVariable UUID id) {
         Product product = productService.getProductById(id);
         if (product == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -82,21 +75,21 @@ public class ProductController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<ProductDto> updateProduct(@PathVariable Long id, @RequestBody ProductDto dto) {
+    public ResponseEntity<ProductDto> updateProduct(@PathVariable UUID id, @RequestBody ProductDto dto) {
         Product product = productService.update(id, dto);
         if (product == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(productMapper.toDto(product),HttpStatus.OK);
     }
 
     @PatchMapping("{id}")
-    public ResponseEntity<ProductDto> patchProduct(@PathVariable Long id,  @RequestBody ProductDto dto) {
+    public ResponseEntity<ProductDto> patchProduct(@PathVariable UUID id,  @RequestBody ProductDto dto) {
         Product product = productService.patch(id, dto);
         if (product == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(productMapper.toDto(product),HttpStatus.OK);
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
         boolean isDeleted = productService.deleteProductById(id);
         if (isDeleted) return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

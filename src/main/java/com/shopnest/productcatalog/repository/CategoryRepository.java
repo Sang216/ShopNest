@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
+import java.util.UUID;
 
-public interface CategoryRepository extends JpaRepository<Category, Long> {
+public interface CategoryRepository extends JpaRepository<Category, UUID> {
     Optional<Category> findByName(String name);
 
     @Query(value = "SELECT AVG(p.price) from Product p where p.category.name=:categoryName")
