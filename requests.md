@@ -1,8 +1,17 @@
- # | Request | Expect |
-|---|---|---|
-| 1 | POST {auth}/auth/signup {"email":"admin@shopnest.com","password":"Pass@12345"} | 201 |
-| 2 | POST {auth}/auth/login (same body) | 200 and a token |
-| 3 | GET {catalog}/products/1 | 404 when the shelf is empty |
-| 4 | POST {catalog}/products with no token | 401 |
-| 5 | POST {catalog}/products with the token, body {"name":"Handmade Candle","price":199.00,"category":{"name":"home-decoration"}} | 201 |
-| 6 | DELETE {catalog}/products/<id from request 5> with the same token | 403 for a CUSTOMER |
+# ShopNest Catalog smoke tests
+
+Run against a disposable Product Catalog instance with a fresh database.
+Set `CATALOG_URL` to the catalog base URL (default `http://localhost:8080`).
+Wait for `GET /products` to return `200` before running the checks.
+
+Send all requests to `CATALOG_URL` without an `Authorization` header.
+For request 3, send `Content-Type: application/json`.
+
+| # | Request | JSON body | Expected status |
+| --- | --- | --- | --- |
+| 1 | `GET /products` | — | `200` |
+| 2 | `GET /products/00000000-0000-0000-0000-000000000001` | — | `404` |
+| 3 | `POST /products` | `{"name":"Handmade Candle","price":199.00,"category":{"name":"home-decoration"}}` | `401` |
+
+Print `PASS` or `FAIL` for each request with its expected and actual status.
+Exit nonzero if any request fails to connect or returns an unexpected status.
