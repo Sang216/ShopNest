@@ -130,14 +130,24 @@ jobs:
       - name: Install OpenCode CLI
         run: npm install --global @opencode/cli
 
-      - name: Run smoke test via OpenCode agent
-        run: |
-          opencode run --standalone \
-          --model groq/openai/gpt-oss-120b \
-          --file requests.md \
-          "Print a Bash script for the smoke checks in requests.md. Do not execute it. Reference CATALOG_URL as an environment variable."
+      - name: Draft Catalog smoke test with OpenCode
         env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+            GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+            opencode run --standalone \
+              --agent catalog-smoke \
+              --model groq/openai/gpt-oss-120b \
+              --file requests.md \
+              "Draft only a Bash script for the attached checks using CATALOG_URL from the environment. Do not execute the script." \
+              > smoke.sh
+            test -s smoke.sh
+            sed -i '/^[[:space:]]*```/d' smoke.sh
+            bash -n smoke.sh 
+
+      - name: Run smoke tests
+        run: bash ./smoke.sh
+        env:
+          CATALOG_URL: ${{ secrets.CATALOG_URL }}
 
   deploy:
     runs-on: ubuntu-latest

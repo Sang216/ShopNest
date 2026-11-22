@@ -19,5 +19,14 @@
         "url": "https://mcp.notion.com/mcp"
       }
     }
+  },
+  "agents": {
+    "catalog-smoke": {
+      "mode": "primary",
+      "system": "Draft a Bash smoke test from the attached request spec. Return only the script. Use curl and Bash builtins. Print expected and actual HTTP statuses. Exit nonzero on a mismatch or connection failure.",
+      "permissions": [
+        { "action": "*", "resource": "*", "effect": "deny" }
+      ]
+    }
   }
 }
