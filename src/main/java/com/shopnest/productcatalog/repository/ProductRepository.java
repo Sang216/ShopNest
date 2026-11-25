@@ -26,4 +26,10 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                                              BigDecimal maxPrice,
                                              State state,
                                              Pageable pageable);
+
+    @EntityGraph(attributePaths = "category")
+    @Query("select p from Product p where p.state = :state "
+            + "and (:word is null or p.name like :word or p.description like :word) "
+            + "and (:maxPrice is null or p.price <= :maxPrice)")
+    Page<Product> search(State state, String word, BigDecimal maxPrice);
 }
