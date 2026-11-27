@@ -27,9 +27,9 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                                              State state,
                                              Pageable pageable);
 
-    @EntityGraph(attributePaths = "category")
+    @EntityGraph(attributePaths = "category")  // solves N+1 Problem
     @Query("select p from Product p where p.state = :state "
             + "and (:word is null or p.name like :word or p.description like :word) "
             + "and (:maxPrice is null or p.price <= :maxPrice)")
-    Page<Product> search(State state, String word, BigDecimal maxPrice);
+    Page<Product> search(State state, String word, BigDecimal maxPrice, Pageable pageable);
 }
