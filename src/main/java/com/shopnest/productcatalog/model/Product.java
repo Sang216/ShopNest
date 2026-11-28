@@ -3,6 +3,8 @@ package com.shopnest.productcatalog.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 
@@ -23,4 +25,7 @@ public class Product extends BaseEntity {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
+    private String embedding;
 }

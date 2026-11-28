@@ -10,4 +10,7 @@ import java.math.BigDecimal;
 public class SearchRequestDto {
     private String query;
     private BigDecimal maxPrice;
+    private Integer page;
+    private Integer size;
+    private String sortBy;
 }
